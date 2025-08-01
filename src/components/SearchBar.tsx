@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, X, Filter, SlidersHorizontal, SortAsc } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, X, Filter, SlidersHorizontal } from 'lucide-react';
 
 interface SearchBarProps {
   searchQuery: string;
@@ -25,8 +25,8 @@ export function SearchBar({
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Expose focus method via global function for keyboard shortcuts
-  useState(() => {
-    (window as any).focusSearchBar = () => {
+  useEffect(() => {
+    (window as { focusSearchBar?: () => void }).focusSearchBar = () => {
       const searchInput = document.querySelector('input[placeholder*="Search services"]') as HTMLInputElement;
       if (searchInput) {
         searchInput.focus();
@@ -44,16 +44,7 @@ export function SearchBar({
     }
   };
 
-  const getSortLabel = (sort: string) => {
-    switch (sort) {
-      case 'name': return 'Name (A-Z)';
-      case 'name-desc': return 'Name (Z-A)';
-      case 'status': return 'Status';
-      case 'category': return 'Category';
-      case 'response-time': return 'Response Time';
-      default: return 'Name (A-Z)';
-    }
-  };
+
 
   return (
     <div className="space-y-4">
@@ -201,7 +192,7 @@ export function SearchBar({
             
             {searchQuery && (
               <p className="text-sm text-muted-foreground mt-2">
-                Searching for: <span className="font-medium text-foreground">"{searchQuery}"</span>
+                Searching for: <span className="font-medium text-foreground">&quot;{searchQuery}&quot;</span>
               </p>
             )}
           </div>

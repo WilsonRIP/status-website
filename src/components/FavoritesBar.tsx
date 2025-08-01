@@ -8,10 +8,10 @@ import { useState, useRef, useEffect } from 'react';
 
 interface FavoritesBarProps {
   favorites: Service[];
-  onServiceClick: (service: Service) => void;
+  onServiceClickAction: (service: Service) => void;
 }
 
-export function FavoritesBar({ favorites, onServiceClick }: FavoritesBarProps) {
+export function FavoritesBar({ favorites, onServiceClickAction }: FavoritesBarProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -102,7 +102,7 @@ export function FavoritesBar({ favorites, onServiceClick }: FavoritesBarProps) {
           <FavoriteServiceCard
             key={service.id}
             service={service}
-            onClick={() => onServiceClick(service)}
+            onClick={() => onServiceClickAction(service)}
           />
         ))}
       </div>

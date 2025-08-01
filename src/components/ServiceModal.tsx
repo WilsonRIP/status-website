@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Service, ServiceStatus } from '@/types/status';
+import { Service } from '@/types/status';
 import { useServiceStatus } from '@/lib/hooks/useServiceStatus';
 import { StatusBadge, StatusIndicator } from './StatusIndicator';
 import { X, ExternalLink, RefreshCw, Clock, Zap, Star, StarIcon, TrendingUp, AlertCircle, Activity } from 'lucide-react';
@@ -164,7 +164,7 @@ export function ServiceModal({
                 {formatLastChecked(status.lastChecked)}
               </div>
               <button
-                onClick={refresh}
+                onClick={() => refresh()}
                 disabled={isLoading}
                 className="flex items-center space-x-2 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
               >

@@ -1,12 +1,12 @@
 'use client';
 
-import { Service, ServiceStatus } from '@/types/status';
+import { Service } from '@/types/status';
 import { Download, FileText, Image } from 'lucide-react';
 import { useState } from 'react';
 
 interface ExportButtonProps {
   services: Service[];
-  statuses: Record<string, 'online' | 'offline' | 'degraded' | 'checking'>;
+  statuses: Record<string, { status: 'online' | 'offline' | 'degraded' | 'checking'; responseTime?: number; lastChecked: Date; error?: string }>;
 }
 
 export function ExportButton({ services, statuses }: ExportButtonProps) {
@@ -155,8 +155,10 @@ ${service.name} (${service.category})
               <button
                 onClick={generateScreenshot}
                 className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors"
+                aria-label="Generate screenshot"
               >
-                <Image className="w-4 h-4" />
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                <Image className="w-4 h-4" aria-hidden="true" />
                 <span>Screenshot</span>
               </button>
             </div>

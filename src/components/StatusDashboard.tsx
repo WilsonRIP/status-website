@@ -13,7 +13,7 @@ import { ExportButton } from './ExportButton';
 import { KeyboardShortcuts } from './KeyboardShortcuts';
 import ThemeToggle from './ThemeToggle';
 import { LiveTimestamp } from './LiveTimestamp';
-import { RefreshCw, Activity, TrendingUp, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
+import { RefreshCw, Activity, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
 
 const CATEGORIES = [
   'all',
@@ -69,7 +69,6 @@ export function StatusDashboard() {
   const [statusFilter, setStatusFilter] = useState<StatusType | 'all'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'name-desc' | 'status' | 'category' | 'response-time'>('name');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   
   const serviceIds = useMemo(() => services.map(s => s.id), []);
   const { statuses, isLoading, refresh } = useAllServiceStatus(serviceIds);
@@ -86,9 +85,9 @@ export function StatusDashboard() {
 
   // Create status record for export (matching ExportButton interface)
   const exportStatusRecord = useMemo(() => {
-    const record: Record<string, StatusType> = {};
+    const record: Record<string, { status: StatusType; responseTime?: number; lastChecked: Date; error?: string }> = {};
     statuses.forEach((status, index) => {
-      record[serviceIds[index]] = status.status;
+      record[serviceIds[index]] = status;
     });
     return record;
   }, [statuses, serviceIds]);
@@ -170,7 +169,7 @@ export function StatusDashboard() {
           return a.name.localeCompare(b.name);
       }
     });
-  }, [selectedCategory, searchQuery, statusFilter, sortBy, statusRecord, services]);
+  }, [selectedCategory, searchQuery, statusFilter, sortBy, statusRecord]);
 
   const getStatusMessage = useCallback(() => {
     if (statusCounts.offline > 0) {
@@ -185,13 +184,13 @@ export function StatusDashboard() {
   }, [statusCounts, totalServices]);
 
   const handleToggleSearch = useCallback(() => {
-    if ((window as any).focusSearchBar) {
-      (window as any).focusSearchBar();
+    if (typeof window !== 'undefined' && (window as { focusSearchBar?: () => void }).focusSearchBar) {
+      (window as { focusSearchBar?: () => void }).focusSearchBar!();
     }
   }, []);
 
   const handleExport = useCallback(() => {
-    setExportMenuOpen(prev => !prev);
+    // Export functionality handled by ExportButton component
   }, []);
 
   const handleServiceClick = useCallback((service: Service) => {
@@ -237,7 +236,7 @@ export function StatusDashboard() {
                 aria-label="Export service status data"
               />
               <button
-                onClick={refresh}
+                onClick={() => refresh()}
                 disabled={isLoading}
                 className="inline-flex items-center space-x-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md"
                 title="Refresh all services"
@@ -269,7 +268,7 @@ export function StatusDashboard() {
         {/* Favorites Bar */}
         <FavoritesBar
           favorites={favoriteServices}
-          onServiceClick={handleServiceClick}
+          onServiceClickAction={handleServiceClick}
         />
 
         {/* Enhanced Stats Section */}
@@ -424,9 +423,9 @@ export function StatusDashboard() {
 
       {/* Keyboard Shortcuts */}
       <KeyboardShortcuts
-        onRefreshAll={refresh}
-        onToggleSearch={handleToggleSearch}
-        onExport={handleExport}
+        onRefreshAllAction={refresh}
+        onToggleSearchAction={handleToggleSearch}
+        onExportAction={handleExport}
       />
     </div>
   );

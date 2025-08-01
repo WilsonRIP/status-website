@@ -38,12 +38,34 @@ export function useServiceStatus(serviceId: string, refreshInterval = 30000) {
 }
 
 export function useAllServiceStatus(serviceIds: string[], refreshInterval = 30000) {
-  const results = serviceIds.map(id => useServiceStatus(id, refreshInterval));
-  
+  const { data, error, isLoading, mutate } = useSWR(
+    serviceIds.length > 0 ? serviceIds : null,
+    async (ids: string[]) => {
+      const promises = ids.map(id => 
+        fetch(`/api/status/${id}`).then(res => res.json())
+      );
+      return Promise.all(promises);
+    },
+    {
+      refreshInterval,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000,
+    }
+  );
+
+  const statuses = serviceIds.map((id, index) => ({
+    id,
+    status: isLoading ? 'checking' : (data?.[index]?.status || 'offline'),
+    responseTime: data?.[index]?.responseTime,
+    lastChecked: new Date(),
+    error: error?.message || data?.[index]?.error,
+  }));
+
   return {
-    statuses: results.map(r => r.status),
-    isLoading: results.some(r => r.isLoading),
-    hasError: results.some(r => r.error),
-    refresh: () => results.forEach(r => r.refresh()),
+    statuses,
+    isLoading,
+    hasError: !!error,
+    refresh: mutate,
   };
 } 

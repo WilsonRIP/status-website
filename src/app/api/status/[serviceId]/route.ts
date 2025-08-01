@@ -63,7 +63,7 @@ export async function GET(
 
       return NextResponse.json(result);
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

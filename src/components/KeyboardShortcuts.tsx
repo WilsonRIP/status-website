@@ -4,15 +4,15 @@ import { useEffect, useState } from 'react';
 import { Keyboard, X } from 'lucide-react';
 
 interface KeyboardShortcutsProps {
-  onRefreshAll: () => void;
-  onToggleSearch: () => void;
-  onExport: () => void;
+  onRefreshAllAction: () => void;
+  onToggleSearchAction: () => void;
+  onExportAction: () => void;
 }
 
 export function KeyboardShortcuts({ 
-  onRefreshAll, 
-  onToggleSearch, 
-  onExport 
+  onRefreshAllAction, 
+  onToggleSearchAction, 
+  onExportAction 
 }: KeyboardShortcutsProps) {
   const [showHelp, setShowHelp] = useState(false);
 
@@ -30,19 +30,19 @@ export function KeyboardShortcuts({
         // Ctrl/Cmd + R - Refresh all services
         case cmdOrCtrl && key === 'r':
           event.preventDefault();
-          onRefreshAll();
+          onRefreshAllAction();
           break;
 
         // Ctrl/Cmd + K or / - Focus search
         case (cmdOrCtrl && key === 'k') || key === '/':
           event.preventDefault();
-          onToggleSearch();
+          onToggleSearchAction();
           break;
 
         // Ctrl/Cmd + E - Export
         case cmdOrCtrl && key === 'e':
           event.preventDefault();
-          onExport();
+          onExportAction();
           break;
 
         // ? - Show help
@@ -60,7 +60,7 @@ export function KeyboardShortcuts({
 
     document.addEventListener('keydown', handleKeydown);
     return () => document.removeEventListener('keydown', handleKeydown);
-  }, [onRefreshAll, onToggleSearch, onExport]);
+  }, [onRefreshAllAction, onToggleSearchAction, onExportAction]);
 
   return (
     <>
