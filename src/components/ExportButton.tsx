@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 interface ExportButtonProps {
   services: Service[];
-  statuses: Record<string, ServiceStatus>;
+  statuses: Record<string, 'online' | 'offline' | 'degraded' | 'checking'>;
 }
 
 export function ExportButton({ services, statuses }: ExportButtonProps) {

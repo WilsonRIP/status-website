@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, X, Filter } from 'lucide-react';
+import { Search, X, Filter, SlidersHorizontal, SortAsc } from 'lucide-react';
 
 interface SearchBarProps {
   searchQuery: string;
@@ -34,23 +34,44 @@ export function SearchBar({
     };
   }, []);
 
+  const getStatusFilterLabel = (status: string) => {
+    switch (status) {
+      case 'online': return '🟢 Online';
+      case 'offline': return '🔴 Offline';
+      case 'degraded': return '🟡 Degraded';
+      case 'checking': return '🔵 Checking';
+      default: return 'All Statuses';
+    }
+  };
+
+  const getSortLabel = (sort: string) => {
+    switch (sort) {
+      case 'name': return 'Name (A-Z)';
+      case 'name-desc': return 'Name (Z-A)';
+      case 'status': return 'Status';
+      case 'category': return 'Category';
+      case 'response-time': return 'Response Time';
+      default: return 'Name (A-Z)';
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Main Search Bar */}
-      <div className="relative flex items-center space-x-4">
+      <div className="relative flex items-center space-x-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
           <input
             type="text"
-            placeholder="Search services by name or description..."
+            placeholder="Search services by name, description, or category..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-10 py-3 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            className="w-full pl-12 pr-12 py-4 bg-card border border-border/50 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 text-base"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent"
             >
               <X className="w-4 h-4" />
             </button>
@@ -59,66 +80,130 @@ export function SearchBar({
         
         <button
           onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-          className={`flex items-center space-x-2 px-4 py-3 rounded-lg border transition-colors ${
+          className={`flex items-center space-x-2 px-4 py-4 rounded-xl border transition-all duration-200 ${
             showAdvancedFilters 
-              ? 'bg-primary text-primary-foreground border-primary' 
-              : 'bg-card border-border hover:bg-accent'
+              ? 'bg-primary text-primary-foreground border-primary shadow-md' 
+              : 'bg-card border-border/50 hover:bg-accent hover:border-border hover:shadow-sm'
           }`}
         >
-          <Filter className="w-4 h-4" />
-          <span className="text-sm font-medium">Filters</span>
+          <SlidersHorizontal className="w-5 h-5" />
+          <span className="font-medium">Filters</span>
         </button>
+      </div>
+
+      {/* Quick Status Filters */}
+      <div className="flex flex-wrap gap-2">
+        {['all', 'online', 'degraded', 'offline'].map((status) => (
+          <button
+            key={status}
+            onClick={() => onStatusFilterChange(status)}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              statusFilter === status
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-card border border-border/50 text-foreground hover:bg-accent hover:border-border'
+            }`}
+          >
+            {getStatusFilterLabel(status)}
+          </button>
+        ))}
       </div>
 
       {/* Advanced Filters */}
       {showAdvancedFilters && (
-        <div className="bg-card border border-border rounded-lg p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-card border border-border/50 rounded-xl p-6 space-y-6 shadow-sm">
+          <div className="flex items-center space-x-2 mb-4">
+            <Filter className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">Advanced Filters</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-foreground mb-3">
                 Filter by Status
               </label>
-              <select
-                value={statusFilter}
-                onChange={(e) => onStatusFilterChange(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              >
-                <option value="all">All Statuses</option>
-                <option value="online">Online Only</option>
-                <option value="offline">Offline Only</option>
-                <option value="degraded">Degraded Only</option>
-                <option value="checking">Checking</option>
-              </select>
+              <div className="space-y-2">
+                {[
+                  { value: 'all', label: 'All Statuses', icon: '📊' },
+                  { value: 'online', label: 'Online Only', icon: '🟢' },
+                  { value: 'offline', label: 'Offline Only', icon: '🔴' },
+                  { value: 'degraded', label: 'Degraded Only', icon: '🟡' },
+                  { value: 'checking', label: 'Checking', icon: '🔵' }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => onStatusFilterChange(option.value)}
+                    className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${
+                      statusFilter === option.value
+                        ? 'bg-primary/10 border border-primary/20 text-primary'
+                        : 'bg-muted/30 hover:bg-muted/50 border border-transparent'
+                    }`}
+                  >
+                    <span className="text-lg">{option.icon}</span>
+                    <span className="font-medium">{option.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Sort Options */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-foreground mb-3">
                 Sort by
               </label>
-              <select
-                value={sortBy}
-                onChange={(e) => onSortChange(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              >
-                <option value="name">Name (A-Z)</option>
-                <option value="name-desc">Name (Z-A)</option>
-                <option value="status">Status</option>
-                <option value="category">Category</option>
-                <option value="response-time">Response Time</option>
-              </select>
+              <div className="space-y-2">
+                {[
+                  { value: 'name', label: 'Name (A-Z)', icon: '🔤' },
+                  { value: 'name-desc', label: 'Name (Z-A)', icon: '🔤' },
+                  { value: 'status', label: 'Status Priority', icon: '⚡' },
+                  { value: 'category', label: 'Category', icon: '📁' },
+                  { value: 'response-time', label: 'Response Time', icon: '⏱️' }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => onSortChange(option.value)}
+                    className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${
+                      sortBy === option.value
+                        ? 'bg-primary/10 border border-primary/20 text-primary'
+                        : 'bg-muted/30 hover:bg-muted/50 border border-transparent'
+                    }`}
+                  >
+                    <span className="text-lg">{option.icon}</span>
+                    <span className="font-medium">{option.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="pt-2 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              Showing {totalResults} service{totalResults !== 1 ? 's' : ''}
-              {searchQuery && (
-                <span> matching "{searchQuery}"</span>
+          {/* Results Summary */}
+          <div className="pt-4 border-t border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">Results:</span>
+                <span className="text-lg font-semibold text-foreground">
+                  {totalResults} service{totalResults !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              {(searchQuery || statusFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    onSearchChange('');
+                    onStatusFilterChange('all');
+                  }}
+                  className="text-sm text-primary hover:text-primary/80 font-medium"
+                >
+                  Clear all filters
+                </button>
               )}
-            </p>
+            </div>
+            
+            {searchQuery && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Searching for: <span className="font-medium text-foreground">"{searchQuery}"</span>
+              </p>
+            )}
           </div>
         </div>
       )}
